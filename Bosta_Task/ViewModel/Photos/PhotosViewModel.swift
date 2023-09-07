@@ -9,10 +9,18 @@ import Foundation
 import UIKit
 
 class PhotosViewModel {
+    var searchedText = ""
    
-    var photoArray: [Photos]? {
+    var photo: [Photos] = [] {
         didSet {
-            bindingData(photoArray,nil)
+            
+            search(with: searchedText)
+        }
+    }
+    var filteredPhotoArray: [Photos]? {
+        didSet {
+            bindingData(filteredPhotoArray,nil)
+            
         }
     }
     var error: Error? {
@@ -25,12 +33,25 @@ class PhotosViewModel {
     init(apiService: ApiService = NetworkManager()) {
         self.apiService = apiService
     }
+    
+    func search(with: String) {
+        searchedText = with
+        if with.isEmpty {
+            filteredPhotoArray = photo
+            return
+        }
+       
+        self.filteredPhotoArray = self.photo.filter { itemSearch in
+            return itemSearch.title?.lowercased().contains(with.lowercased()) ?? false
+        }
+    }
+
 
         
     func getPhotos(endPoint: String) {
         apiService.getPhotos(endPoint: endPoint) { photos, error in
             if let photos = photos {
-                self.photoArray = photos
+                self.photo = photos
                 
             }
             if let error = error {
@@ -43,11 +64,11 @@ class PhotosViewModel {
 extension PhotosViewModel{
 
     func getPhotos() -> [Photos]?{
-        return photoArray
+        return filteredPhotoArray
     }
     
     func getPhotos(indexPath: IndexPath) -> Photos?{
-        return photoArray?[indexPath.row]
+        return filteredPhotoArray?[indexPath.row]
     }
     
 }

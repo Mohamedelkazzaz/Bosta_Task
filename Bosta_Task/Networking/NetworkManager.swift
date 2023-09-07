@@ -13,7 +13,7 @@ import UIKit
 class NetworkManager: ApiService{
     
     
-    func getUser(endPoint: String, completion: @escaping ((Profile?, Error?) -> Void)) {
+    func getUser(endPoint: String, completion: @escaping (([Profile]?, Error?) -> Void)) {
         guard let url = URL(string: Url(endPoint: endPoint).url) else {return}
         print(url)
       
@@ -28,7 +28,7 @@ class NetworkManager: ApiService{
                     guard let data = res.data else { return }
                     
                     do{
-                        let json = try JSONDecoder().decode(Profile.self, from: data)
+                        let json = try JSONDecoder().decode([Profile].self, from: data)
 
                         completion(json, nil)
                         
@@ -41,11 +41,12 @@ class NetworkManager: ApiService{
             }
     }
     
-    func getAlbums(endPoint: String, completion: @escaping (([Album]?, Error?) -> Void)) {
+    func getAlbums(userId: Int, endPoint: String, completion: @escaping (([Album]?, Error?) -> Void)) {
         guard let url = URL(string: Url(endPoint: endPoint).url) else {return}
         print(url)
       
-            AF.request(url, method: .get, parameters: nil, encoding: JSONEncoding.default, headers: nil).response { res in
+        let par = [ "userId": userId]
+            AF.request(url, method: .get, parameters: par, encoding: URLEncoding.default, headers: nil).response { res in
 
                 switch res.result{
                 case .failure(let error):

@@ -12,11 +12,17 @@ class PhotosViewController: UIViewController {
     @IBOutlet weak var collectionView: UICollectionView!
     
     var photosViewModel: PhotosViewModel = PhotosViewModel()
+    var navTitle = ""
 
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.delegate = self
         collectionView.dataSource = self
+        
+        searchBar.delegate = self
+        
+//        navigationController?.title = navTitle
+//        print(navTitle)
         
         photosViewModel.getPhotos(endPoint: "photos")
         photosViewModel.bindingData = { photos, error in
@@ -48,8 +54,18 @@ extension PhotosViewController: UICollectionViewDelegate, UICollectionViewDataSo
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
             let width = collectionView.bounds.width / 3 // Display three images in a row
             let height = width // Maintain a square aspect ratio
+            print("###################\(width)")
+            print(width,height)
             return CGSize(width: width, height: height)
         }
     
     
+}
+
+extension PhotosViewController: UISearchBarDelegate{
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        
+        photosViewModel.search(with: searchText)
+        
+    }
 }

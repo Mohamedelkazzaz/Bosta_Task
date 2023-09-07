@@ -10,18 +10,31 @@ import UIKit
 
 
 class ProfileViewModel {
+    var profilesArray: [Profile]?{
+        didSet {
+            profile = profilesArray?.first
+        }
+    }
     var profile: Profile? {
         didSet {
-            bindingData(profile,nil)
+            onProfileRecived?(profile)
+            getAlbums(endPoint: "albums")
         }
     }
     var error: Error? {
         didSet {
-            bindingData(nil, error)
+            onErrorRecived?(error)
+        }
+    }
+    var albumArray: [Album]? {
+        didSet {
+            onAlbumRecived?(albumArray)
         }
     }
     let apiService: ApiService
-    var bindingData: ((Profile?,Error?) -> Void) = {_, _ in }
+    var onProfileRecived: ((Profile?) -> Void)?
+    var onAlbumRecived: (([Album]?) -> Void)?
+    var onErrorRecived: ((Error?) -> Void)?
     init(apiService: ApiService = NetworkManager()) {
         self.apiService = apiService
     }
@@ -29,7 +42,21 @@ class ProfileViewModel {
     func getUsers(endPoint: String) {
         apiService.getUser(endPoint: endPoint) { profile, error in
             if let profile = profile {
-                self.profile = profile
+                self.profilesArray = profile.shuffled()
+                
+            }
+            if let error = error {
+                self.error = error
+            }
+        }
+    }
+    
+    func getAlbums(endPoint: String) {
+        guard let profileId = profile?.id else{return}
+        apiService.getAlbums(userId: profileId,endPoint: endPoint) { albums, error in
+            if let albums = albums {
+                self.albumArray = albums
+                
             }
             if let error = error {
                 self.error = error
@@ -38,4 +65,15 @@ class ProfileViewModel {
     }
 }
 
+extension ProfileViewModel{
+
+    func getAlbums() -> [Album]?{
+        return albumArray
+    }
+    
+    func getAlbums(indexPath: IndexPath) -> Album?{
+        return albumArray?[indexPath.row]
+    }
+    
+}
 

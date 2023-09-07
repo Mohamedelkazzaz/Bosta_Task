@@ -103,9 +103,9 @@
                                 </connections>
                             </searchBar>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Gdm-Op-Jxo">
-                                <rect key="frame" x="0.0" y="165" width="393" height="687"/>
+                                <rect key="frame" x="0.0" y="155" width="393" height="697"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="7dQ-Vt-Am7">
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="7dQ-Vt-Am7">
                                     <size key="itemSize" width="128" height="128"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
@@ -144,7 +144,7 @@
                             <constraint firstItem="IOq-gB-7vM" firstAttribute="trailing" secondItem="Gdm-Op-Jxo" secondAttribute="trailing" id="C0c-VO-sIR"/>
                             <constraint firstItem="PUR-U7-YA5" firstAttribute="top" secondItem="IOq-gB-7vM" secondAttribute="top" constant="40" id="CgX-zA-Ubi"/>
                             <constraint firstItem="Gdm-Op-Jxo" firstAttribute="leading" secondItem="IOq-gB-7vM" secondAttribute="leading" id="K8H-TL-HPV"/>
-                            <constraint firstItem="Gdm-Op-Jxo" firstAttribute="top" secondItem="PUR-U7-YA5" secondAttribute="bottom" constant="10" id="NUA-8W-H5n"/>
+                            <constraint firstItem="Gdm-Op-Jxo" firstAttribute="top" secondItem="PUR-U7-YA5" secondAttribute="bottom" symbolic="YES" id="NUA-8W-H5n"/>
                             <constraint firstItem="PUR-U7-YA5" firstAttribute="leading" secondItem="IOq-gB-7vM" secondAttribute="leading" constant="10" id="cVg-oU-IoF"/>
                             <constraint firstAttribute="bottom" secondItem="Gdm-Op-Jxo" secondAttribute="bottom" id="rqC-fD-D2r"/>
                         </constraints>
