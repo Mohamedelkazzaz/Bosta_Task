@@ -10,6 +10,8 @@ import UIKit
 
 class PhotosViewModel {
     var searchedText = ""
+    
+    
    
     var photo: [Photos] = [] {
         didSet {
@@ -29,9 +31,11 @@ class PhotosViewModel {
         }
     }
     let apiService: ApiService
+    var album: Album?
     var bindingData: (([Photos]?,Error?) -> Void) = {_,_ in }
-    init(apiService: ApiService = NetworkManager()) {
+    init(apiService: ApiService = NetworkManager(),album: Album?) {
         self.apiService = apiService
+        self.album = album
     }
     
     func search(with: String) {
@@ -48,8 +52,9 @@ class PhotosViewModel {
 
 
         
-    func getPhotos(endPoint: String) {
-        apiService.getPhotos(endPoint: endPoint) { photos, error in
+    func getPhotosArray() {
+        guard let albumId = album?.id else{return}
+        apiService.getPhotos(albumId: albumId, endPoint: "photos") { photos, error in
             if let photos = photos {
                 self.photo = photos
                 

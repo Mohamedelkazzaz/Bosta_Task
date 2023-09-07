@@ -11,7 +11,7 @@ class PhotosViewController: UIViewController {
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var collectionView: UICollectionView!
     
-    var photosViewModel: PhotosViewModel = PhotosViewModel()
+    var photosViewModel: PhotosViewModel = PhotosViewModel(album: nil)
     var navTitle = ""
 
     override func viewDidLoad() {
@@ -21,10 +21,9 @@ class PhotosViewController: UIViewController {
         
         searchBar.delegate = self
         
-//        navigationController?.title = navTitle
-//        print(navTitle)
+        self.title = photosViewModel.album?.title
         
-        photosViewModel.getPhotos(endPoint: "photos")
+        photosViewModel.getPhotosArray()
         photosViewModel.bindingData = { photos, error in
             DispatchQueue.main.async {
                 self.collectionView.reloadData()

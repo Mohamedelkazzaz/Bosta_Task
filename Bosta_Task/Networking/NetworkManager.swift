@@ -14,7 +14,7 @@ class NetworkManager: ApiService{
     
     
     func getUser(endPoint: String, completion: @escaping (([Profile]?, Error?) -> Void)) {
-        guard let url = URL(string: Url(endPoint: endPoint).url) else {return}
+        guard let url = URL(string: Url(endPoint: "users").url) else {return}
         print(url)
       
             AF.request(url, method: .get, parameters: nil, encoding: JSONEncoding.default, headers: nil).response { res in
@@ -42,7 +42,7 @@ class NetworkManager: ApiService{
     }
     
     func getAlbums(userId: Int, endPoint: String, completion: @escaping (([Album]?, Error?) -> Void)) {
-        guard let url = URL(string: Url(endPoint: endPoint).url) else {return}
+        guard let url = URL(string: Url(endPoint: "albums").url) else {return}
         print(url)
       
         let par = [ "userId": userId]
@@ -70,11 +70,12 @@ class NetworkManager: ApiService{
             }
     }
     
-    func getPhotos(endPoint: String, completion: @escaping (([Photos]?, Error?) -> Void)) {
-        guard let url = URL(string: Url(endPoint: endPoint).url) else {return}
+    func getPhotos(albumId: Int,endPoint: String, completion: @escaping (([Photos]?, Error?) -> Void)) {
+        guard let url = URL(string: Url(endPoint: "photos").url) else {return}
         print(url)
       
-            AF.request(url, method: .get, parameters: nil, encoding: JSONEncoding.default, headers: nil).response { res in
+        let par = [ "albumId": albumId]
+            AF.request(url, method: .get, parameters: par, encoding: URLEncoding.default, headers: nil).response { res in
 
                 switch res.result{
                 case .failure(let error):

@@ -13,7 +13,7 @@ class ProfileViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     
     var profileViewModel: ProfileViewModel = ProfileViewModel()
-    var albumViewModel: AlbumsViewModel = AlbumsViewModel()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,7 +23,7 @@ class ProfileViewController: UIViewController {
        
         
         
-        profileViewModel.getUsers(endPoint: "users")
+        profileViewModel.getUsers()
         
         profileViewModel.onProfileRecived = { users in
             DispatchQueue.main.async {
@@ -46,19 +46,6 @@ class ProfileViewController: UIViewController {
             }
         }
         
-//        albumViewModel.getAlbums(userId: <#Int#>, endPoint: "albums")
-//
-//        albumViewModel.bindingData = { albums, error in
-//            DispatchQueue.main.async {
-//                self.tableView.reloadData()
-//            }
-//
-//        if let error = error{
-//            print(error.localizedDescription)
-//        }
-//
-//        }
-            
     }
 
 }
@@ -85,7 +72,9 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource{
         let vc = stoaryBoard.instantiateViewController(withIdentifier: "PhotosViewController") as! PhotosViewController
 //        vc.id = petsViewModel.petsArray?[indexPath.row].id ?? 0
 //        vc.navTitle = albumViewModel.albumArray?[indexPath.row].title ?? ""
-        vc.navigationController?.title = albumViewModel.albumArray?[indexPath.row].title ?? ""
+//        vc.navigationController?.title =
+        let viewModel = PhotosViewModel(album: profileViewModel.getAlbums(indexPath: indexPath))
+        vc.photosViewModel = viewModel
         navigationController?.pushViewController(vc, animated: true)
     }
     

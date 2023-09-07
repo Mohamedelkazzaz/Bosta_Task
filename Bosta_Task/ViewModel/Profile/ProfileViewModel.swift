@@ -18,7 +18,7 @@ class ProfileViewModel {
     var profile: Profile? {
         didSet {
             onProfileRecived?(profile)
-            getAlbums(endPoint: "albums")
+            getAlbumsArray()
         }
     }
     var error: Error? {
@@ -39,8 +39,8 @@ class ProfileViewModel {
         self.apiService = apiService
     }
     
-    func getUsers(endPoint: String) {
-        apiService.getUser(endPoint: endPoint) { profile, error in
+    func getUsers() {
+        apiService.getUser(endPoint: "users") { profile, error in
             if let profile = profile {
                 self.profilesArray = profile.shuffled()
                 
@@ -51,9 +51,9 @@ class ProfileViewModel {
         }
     }
     
-    func getAlbums(endPoint: String) {
+    func getAlbumsArray() {
         guard let profileId = profile?.id else{return}
-        apiService.getAlbums(userId: profileId,endPoint: endPoint) { albums, error in
+        apiService.getAlbums(userId: profileId,endPoint: "albums") { albums, error in
             if let albums = albums {
                 self.albumArray = albums
                 
