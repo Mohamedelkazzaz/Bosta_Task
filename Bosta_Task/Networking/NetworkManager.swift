@@ -8,96 +8,94 @@
 import Foundation
 import Alamofire
 import UIKit
-
+import RxSwift
 
 class NetworkManager: ApiService{
+
     
-    
-    func getUser(endPoint: String, completion: @escaping (([Profile]?, Error?) -> Void)) {
-        guard let url = URL(string: Url(endPoint: "users").url) else {return}
-        print(url)
-      
-            AF.request(url, method: .get, parameters: nil, encoding: JSONEncoding.default, headers: nil).response { res in
-
-                switch res.result{
-                case .failure(let error):
-                    print("error")
-                    completion(nil, error)
-                case .success(_):
-
-                    guard let data = res.data else { return }
-                    
-                    do{
-                        let json = try JSONDecoder().decode([Profile].self, from: data)
-
-                        completion(json, nil)
-                        
-                    }catch let error{
-                        
-                        print(error)
-                        completion(nil, error)
+    func getUser(endPoint: String) -> RxSwift.Observable<([Profile]?, Error?)> {
+        return Observable.create { observer -> Disposable in
+            guard let url = URL(string: Url(endPoint: "users").url) else {
+                observer.onError(NSError(domain: "InvalidURL", code: 0, userInfo: nil))
+                return Disposables.create()
+            }
+            
+            AF.request(url, method: .get, parameters: nil, encoding: JSONEncoding.default, headers: nil)
+                .response { response in
+                    switch response.result {
+                    case .failure(let error):
+                        observer.onError(error)
+                    case .success(let data):
+                        do {
+                            let profiles = try JSONDecoder().decode([Profile].self, from: data ?? Data())
+                            observer.onNext((profiles,nil))
+                            observer.onCompleted()
+                        } catch let error {
+                            observer.onError(error)
+                        }
                     }
                 }
-            }
+            
+            return Disposables.create()
+        }
     }
     
-    func getAlbums(userId: Int, endPoint: String, completion: @escaping (([Album]?, Error?) -> Void)) {
-        guard let url = URL(string: Url(endPoint: "albums").url) else {return}
-        print(url)
-      
-        let par = [ "userId": userId]
-            AF.request(url, method: .get, parameters: par, encoding: URLEncoding.default, headers: nil).response { res in
 
-                switch res.result{
-                case .failure(let error):
-                    print("error")
-                    completion(nil, error)
-                case .success(_):
-
-                    guard let data = res.data else { return }
-                    
-                    do{
-                        let json = try JSONDecoder().decode([Album].self, from: data)
-
-                        completion(json, nil)
-                        
-                    }catch let error{
-                        
-                        print(error)
-                        completion(nil, error)
+    func getAlbums(userId: Int, endPoint: String) -> Observable<([Album]?, Error?)> {
+        return Observable.create { observer -> Disposable in
+            guard let url = URL(string: Url(endPoint: "albums").url) else {
+                observer.onError(NSError(domain: "InvalidURL", code: 0, userInfo: nil))
+                return Disposables.create()
+            }
+            let par = [ "userId": userId]
+            AF.request(url, method: .get, parameters: par, encoding: URLEncoding.default, headers: nil)
+                .response { response in
+                    switch response.result {
+                    case .failure(let error):
+                        observer.onError(error)
+                    case .success(let data):
+                        do {
+                            let albums = try JSONDecoder().decode([Album].self, from: data ?? Data())
+                            observer.onNext((albums,nil))
+                            observer.onCompleted()
+                        } catch let error {
+                            observer.onError(error)
+                        }
                     }
                 }
-            }
+            
+            return Disposables.create()
+        }
     }
+
     
-    func getPhotos(albumId: Int,endPoint: String, completion: @escaping (([Photos]?, Error?) -> Void)) {
-        guard let url = URL(string: Url(endPoint: "photos").url) else {return}
-        print(url)
-      
-        let par = [ "albumId": albumId]
-            AF.request(url, method: .get, parameters: par, encoding: URLEncoding.default, headers: nil).response { res in
-
-                switch res.result{
-                case .failure(let error):
-                    print("error")
-                    completion(nil, error)
-                case .success(_):
-
-                    guard let data = res.data else { return }
-                    
-                    do{
-                        let json = try JSONDecoder().decode([Photos].self, from: data)
-
-                        completion(json, nil)
-                        
-                    }catch let error{
-                        
-                        print(error)
-                        completion(nil, error)
+    func getPhotos(albumId: Int, endPoint: String) -> Observable<([Photos]?, Error?)> {
+        return Observable.create { observer -> Disposable in
+            guard let url = URL(string: Url(endPoint: "photos").url) else {
+                observer.onError(NSError(domain: "InvalidURL", code: 0, userInfo: nil))
+                return Disposables.create()
+            }
+            let par = [ "albumId": albumId]
+            AF.request(url, method: .get, parameters: par, encoding: URLEncoding.default, headers: nil)
+                .response { response in
+                    switch response.result {
+                    case .failure(let error):
+                        observer.onError(error)
+                    case .success(let data):
+                        do {
+                            let photos = try JSONDecoder().decode([Photos].self, from: data ?? Data())
+                            observer.onNext((photos,nil))
+                            observer.onCompleted()
+                        } catch let error {
+                            observer.onError(error)
+                        }
                     }
                 }
-            }
+            
+            return Disposables.create()
+        }
+        }
     }
     
     
-}
+

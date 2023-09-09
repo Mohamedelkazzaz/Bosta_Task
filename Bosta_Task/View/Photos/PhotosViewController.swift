@@ -6,6 +6,9 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
+
 
 class PhotosViewController: UIViewController {
     @IBOutlet weak var searchBar: UISearchBar!
@@ -13,6 +16,8 @@ class PhotosViewController: UIViewController {
     
     var photosViewModel: PhotosViewModel = PhotosViewModel(album: nil)
     var navTitle = ""
+    private let disposeBag = DisposeBag()
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,21 +26,20 @@ class PhotosViewController: UIViewController {
         
         searchBar.delegate = self
         
-        self.title = photosViewModel.album?.title
+       self.title = photosViewModel.album?.title
         
         photosViewModel.getPhotosArray()
-        photosViewModel.bindingData = { photos, error in
-            DispatchQueue.main.async {
-                self.collectionView.reloadData()
-            }
         
-        if let error = error{
-            print(error.localizedDescription)
-        }
-            
-        }
-        
+        photosViewModel.photoSubject
+          .subscribe(onNext: { [weak self] photos in
+              DispatchQueue.main.async {
+                  self?.collectionView.reloadData()
+              }
+          })
+          .disposed(by: disposeBag)
+
     }
+    
 
 }
 
@@ -68,3 +72,4 @@ extension PhotosViewController: UISearchBarDelegate{
         
     }
 }
+

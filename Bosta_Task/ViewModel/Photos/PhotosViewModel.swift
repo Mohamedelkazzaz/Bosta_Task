@@ -7,73 +7,86 @@
 
 import Foundation
 import UIKit
+import RxSwift
+
 
 class PhotosViewModel {
     var searchedText = ""
     
-    
-   
     var photo: [Photos] = [] {
         didSet {
-            
             search(with: searchedText)
         }
     }
-    var filteredPhotoArray: [Photos]? {
+    
+    var filteredPhotoArray: Observable<[Photos]?> {
+        return filteredPhotoArraySubject.asObservable()
+    }
+    
+    var error: Observable<Error?> {
+        return errorSubject.asObservable()
+    }
+    var photosArray: [Photos]? {
         didSet {
-            bindingData(filteredPhotoArray,nil)
-            
+            photoSubject.onNext(photosArray ?? [])
         }
     }
-    var error: Error? {
-        didSet {
-            bindingData(nil, error)
-        }
-    }
-    let apiService: ApiService
-    var album: Album?
-    var bindingData: (([Photos]?,Error?) -> Void) = {_,_ in }
-    init(apiService: ApiService = NetworkManager(),album: Album?) {
+    
+    private let apiService: ApiService
+     var album: Album?
+    private let disposeBag = DisposeBag()
+    private let filteredPhotoArraySubject = PublishSubject<[Photos]?>()
+    private let errorSubject = BehaviorSubject<Error?>(value: nil)
+     let photoSubject = PublishSubject<[Photos]>()
+
+    
+    init(apiService: ApiService = NetworkManager(), album: Album?) {
         self.apiService = apiService
         self.album = album
     }
     
-    func search(with: String) {
-        searchedText = with
-        if with.isEmpty {
-            filteredPhotoArray = photo
+    func search(with searchText: String) {
+        searchedText = searchText
+        if searchText.isEmpty {
+            filteredPhotoArraySubject.onNext(photo)
             return
         }
-       
-        self.filteredPhotoArray = self.photo.filter { itemSearch in
-            return itemSearch.title?.lowercased().contains(with.lowercased()) ?? false
-        }
-    }
-
-
         
-    func getPhotosArray() {
-        guard let albumId = album?.id else{return}
-        apiService.getPhotos(albumId: albumId, endPoint: "photos") { photos, error in
-            if let photos = photos {
-                self.photo = photos
-                
-            }
-            if let error = error {
-                self.error = error
-            }
+        let filteredPhotos = photo.filter { itemSearch in
+            return itemSearch.title?.lowercased().contains(searchText.lowercased()) ?? false
         }
+        
+        filteredPhotoArraySubject.onNext(filteredPhotos)
     }
+    
+    func getPhotosArray() {
+        guard let albumId = album?.id else { return }
+        apiService.getPhotos(albumId: albumId, endPoint: "photos")
+            .subscribe(onNext: { [weak self] photos in
+                print(photos)
+                self?.photoSubject.onNext(photos.0 ?? [])
+                
+                self?.photosArray = photos.0
+            }, onError: { [weak self] error in
+                self?.errorSubject.onNext(error)
+            })
+            .disposed(by: disposeBag)
+    }
+    
+
+    
 }
 
 extension PhotosViewModel{
 
     func getPhotos() -> [Photos]?{
-        return filteredPhotoArray
+        return photosArray
     }
     
     func getPhotos(indexPath: IndexPath) -> Photos?{
-        return filteredPhotoArray?[indexPath.row]
-    }
+        return photosArray?[indexPath.row]
+        }
+    
+
     
 }

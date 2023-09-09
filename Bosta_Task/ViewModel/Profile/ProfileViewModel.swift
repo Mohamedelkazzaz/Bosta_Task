@@ -7,62 +7,86 @@
 
 import Foundation
 import UIKit
+import RxSwift
 
 
 class ProfileViewModel {
-    var profilesArray: [Profile]?{
-        didSet {
-            profile = profilesArray?.first
-        }
+    private let disposeBag = DisposeBag()
+    
+     let profilesSubject = PublishSubject<[Profile]>()
+     let profileSubject = PublishSubject<Profile?>()
+    private let errorSubject = PublishSubject<Error>()
+     var albumsSubject = PublishSubject<[Album]>()
+    private var profileId = 0
+    
+    var profilesObservable: Observable<[Profile]> {
+        return profilesSubject.asObservable()
     }
-    var profile: Profile? {
+    
+    var profileObservable: Observable<Profile?> {
+        return profileSubject.asObservable()
+        
+    }
+    
+    var errorObservable: Observable<Error> {
+        return errorSubject.asObservable()
+    }
+    
+    var albumsObservable: Observable<[Album]> {
+        return albumsSubject.asObservable()
+    }
+        var profile: Profile? {
+            didSet {
+
+                profileSubject.onNext(profile)
+                
+            }
+        }
+    
+    var albumArray: [Album]? {
         didSet {
-            onProfileRecived?(profile)
+            albumsSubject.onNext(albumArray ?? [])
             getAlbumsArray()
         }
     }
-    var error: Error? {
-        didSet {
-            onErrorRecived?(error)
-        }
-    }
-    var albumArray: [Album]? {
-        didSet {
-            onAlbumRecived?(albumArray)
-        }
-    }
+    
     let apiService: ApiService
-    var onProfileRecived: ((Profile?) -> Void)?
-    var onAlbumRecived: (([Album]?) -> Void)?
-    var onErrorRecived: ((Error?) -> Void)?
+    
     init(apiService: ApiService = NetworkManager()) {
         self.apiService = apiService
     }
     
     func getUsers() {
-        apiService.getUser(endPoint: "users") { profile, error in
-            if let profile = profile {
-                self.profilesArray = profile.shuffled()
-                
-            }
-            if let error = error {
-                self.error = error
-            }
-        }
-    }
+         apiService
+             .getUser(endPoint: "users")
+             .subscribe(onNext: { [weak self] profiles in
+                 let array = profiles.0?.shuffled() ?? []
+                 self?.profilesSubject.onNext(array)
+                 
+                 self?.profileSubject.onNext(array.first)
+                 self?.profileId = profiles.0?.first?.id ?? 0
+                 self?.getAlbumsArray()
+                 self?.albumsSubject.onNext(self?.albumArray ?? [])
+                 
+             }, onError: { [weak self] error in
+                 self?.errorSubject.onNext(error)
+             })
+             .disposed(by: disposeBag)
+     }
     
     func getAlbumsArray() {
-        guard let profileId = profile?.id else{return}
-        apiService.getAlbums(userId: profileId,endPoint: "albums") { albums, error in
-            if let albums = albums {
-                self.albumArray = albums
-                
-            }
-            if let error = error {
-                self.error = error
-            }
-        }
+
+        apiService
+            .getAlbums(userId: profileId, endPoint: "albums")
+            .subscribe(onNext: { [weak self] albums in
+                self?.albumsSubject.onNext(albums.0 ?? [])
+                self?.albumArray = albums.0
+            }, onError: { [weak self] error in
+                self?.errorSubject.onNext(error)
+            })
+            .disposed(by: disposeBag)
     }
+
 }
 
 extension ProfileViewModel{
@@ -70,10 +94,9 @@ extension ProfileViewModel{
     func getAlbums() -> [Album]?{
         return albumArray
     }
-    
+
     func getAlbums(indexPath: IndexPath) -> Album?{
         return albumArray?[indexPath.row]
     }
-    
-}
 
+}
